@@ -17,21 +17,19 @@ export default function Registro() {
     setError(null);
     setSuccess(null);
 
-    try { await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          displayName: username,
-        },
-      },
-    });
-    setSuccess('Hemos enviado un mail de confirmación.');
-    setEmail('');
-    setPassword('');
-  } catch (error) {
-      setError(error.message);
-    }
+    const { error } = await supabase
+      .from('Usuario')
+      .insert({
+        nombre: name,
+        mail: email,
+        contrasenia: password,
+      })
+
+      if (error) {
+        setError(error.message);
+      } else {
+        setSuccess('Usuario registrado correctamente');
+      }
   };
 
   return (
@@ -59,8 +57,8 @@ export default function Registro() {
             </label>
             <input
               className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="password"
-              type="password"
+              id="nombre"
+              type="nombre"
               placeholder="Cristina"
               value={name}
               onChange={(e) => setName(e.target.value)}

@@ -19,13 +19,19 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+      const { data, error } = await supabase
+       .from('Usuario')
+       .select('*')
+       .eq('mail', email)
+       .eq('contrasenia', password)
 
-      setSuccess(true)
-      navigate('/')
+      if (error || !data) {
+        setError(error.message);
+      } else {
+        setSuccess('Usuario registrado correctamente');
+        setTimeout(() => navigate('/'), 2000);
+      }
+
 
     } catch (err) {
       setError("Ocurrió un error durante el inicio de sesión")
