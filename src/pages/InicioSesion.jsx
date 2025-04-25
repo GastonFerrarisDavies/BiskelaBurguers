@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { useNavigate } from 'react-router-dom';
 import supabase from "../config/supabaseClient"
-import { ArrowLeftFromLine } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -19,19 +18,13 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      const { data, error } = await supabase
-       .from('Usuario')
-       .select('*')
-       .eq('mail', email)
-       .eq('contrasenia', password)
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-      if (error || !data) {
-        setError(error.message);
-      } else {
-        setSuccess('Usuario registrado correctamente');
-        setTimeout(() => navigate('/'), 2000);
-      }
-
+      setSuccess(true)
+      navigate('/')
 
     } catch (err) {
       setError("Ocurrió un error durante el inicio de sesión")
@@ -41,15 +34,6 @@ export default function LoginPage() {
   }
 
   return (
-    <>
-    <header>
-        <div className="absolute flex flex-row justify-between align-center w-screen p-3 bg-gebum-violet">
-        <span className="text-white font-extrabold text-[1.3rem]" onClick={() => {navigate('/')}} >Biskela</span>
-        <div className="flex flex-row gap-2">
-          <ArrowLeftFromLine className="" onClick={() => navigate(-1)} color="white" size={30} />
-        </div>
-        </div>
-      </header>
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
@@ -129,8 +113,6 @@ export default function LoginPage() {
         )}
       </div>
     </div>
-    </>
   )
 }
-
 
