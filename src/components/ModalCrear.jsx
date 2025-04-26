@@ -1,92 +1,136 @@
-import { CircleX } from 'lucide-react';
-import { useState } from 'react';
-import supabase from '../config/supabaseClient.js';
+"use client"
 
-export function ModalCrear ({isOpen, closeModal}) {
-    const [name, setName] = useState('');
-    const [category, setCategory] = useState('');
-    const [price, setPrice] = useState('');
-    const [formError, setFormError] = useState(null);
+import { useState } from "react"
+import { CircleX } from "lucide-react"
+import supabase from "../config/supabaseClient"
+import CardHeader from "./CardHeader"
+import Button from "./Button"
+import Label from "./Label"
+import Input from "./Input"
+import RadioGroup from "./RadioGroup"
+import RadioGroupItem from "./RadioGroupItem"
+import Card from "./Card"
+import CardTitle from "./CardTitle"
+import CardContent from "./CardContent"
+import CardFooter from "./CardFooter"
 
-    const sumbitCreate = async (e) => {
-        e.preventDefault();
-        console.log(name, category, price);
 
-        if ( !name || !category || !price) {
-            setFormError('Todos los campos son obligatorios');
-        }
+export function ModalCrear({ isOpen, closeModal }) {
+  const [name, setName] = useState("")
+  const [category, setCategory] = useState("")
+  const [price, setPrice] = useState("")
+  const [formError, setFormError] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-        if ( name && category && price ) {
-            const { data, error } = await supabase
-            .from('Producto')
-            .insert([
-                { name, category, price }
-            ])
-            setName('');
-            setCategory('');
-            setPrice('');
-            closeModal();
-            alert('Producto creado con éxito');
-            if (error) {
-                setFormError(error)
-            }
-            else {
-                {closeModal}
-            }
-        }
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setFormError(null)
+
+    if (!name || !category || !price) {
+      setFormError("Todos los campos son obligatorios")
+      return
     }
 
-    if (!isOpen) return null;
-    return (
-        <>
-            <div className={` fixed inset-0 transition-colors ${isOpen ? 'visible bg-black/50' : 'hidden'}`}>
-                <div className="flex flex-col justify-center items-center mx-5 my-11 bg-gradient-to-br from-[#ececec] to-[#e6e6e6] rounded-lg shadow-md p-1">
-                    <div className="flex flex-row justify-around m-2 gap-2">
-                        <h4 className="text-[1.2rem] font-extrabold">Crear producto</h4>
-                        <button onClick={closeModal}>
-                            <CircleX color="#ff6961" size={25} />
-                        </button>
-                    </div>
-                    
-                    <div className="flex flex-col gap-3">
-                        <form onSubmit={ sumbitCreate } className="flex flex-col gap-3">
-                            <fieldset className="border-2 border-gray-700 rounded-md p-2">
-                                <legend className="p-1">Nombre: </legend>
-                                <input className="rounded-md p-1" type="text"
-                                id="name"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)} />
-                            </fieldset>
-                            
+    try {
+      setIsSubmitting(true)
 
-                            <fieldset className="border-2 border-gray-700 rounded-md p-2">
-                            <legend className="p-1">Categoría:</legend>
+      const { error } = await supabase.from("Producto").insert([{ name, category, price }])
 
-                            <div>
-                                <input type="radio" id="hamburguesa" name="category" value="hamburguesa" checked={category === 'hamburguesa'} onChange={(e) => setCategory(e.target.value)} />
-                                <label for="hamburguesa">Hamburguesa</label>
-                            </div>
+      if (error) {
+        throw error
+      }
 
-                            <div>
-                                <input type="radio" id="extra" name="category" value="extra" checked={category === 'extra'} onChange={(e) => setCategory(e.target.value)} />
-                                <label for="extra">Extra</label>
-                            </div>
-                            </fieldset>
+      setName("")
+      setCategory("")
+      setPrice("")
+      closeModal()
+      alert("Producto creado con éxito")
+    } catch (error) {
+      setFormError("Error al crear el producto")
+      console.error(error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
-                            <fieldset className="border-2 border-gray-700 rounded-md p-2">
-                                <legend className="p-1">Precio: </legend>
-                                <input className="rounded-md p-1" type="text"
-                                id="price"
-                                value={price}
-                                onChange={(e) => setPrice(e.target.value)} />
-                            </fieldset>
-                            {formError && <p className="text-red-500">{ formError }</p>}
-                            <button className="m-4 w-full bg-gebum-violet text-white p-2 rounded-md hover:bg-gebum-violet transition-colors">
-                                Crear
-                            </button>
-                        </form>
-                    </div>
-                </div>
+  if (!isOpen) return null
+
+  return (
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ${
+        isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+      }`}
+    >
+      <div className="absolute inset-0 bg-black/50" onClick={closeModal} />
+
+      <Card className="relative w-full max-w-md mx-4 shadow-lg">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-xl font-bold">Crear producto</CardTitle>
+          <Button variant="ghost" size="icon" onClick={closeModal} className="h-8 w-8 rounded-full">
+            <CircleX className="h-5 w-5 text-red-500" />
+          </Button>
+        </CardHeader>
+
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nombre</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Nombre del producto"
+              />
             </div>
-        </>)
+
+            <div className="space-y-2">
+              <Label>Categoría</Label>
+              <RadioGroup value={category} onValueChange={setCategory} className="flex flex-col space-y-1">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    value="hamburguesa"
+                    id="hamburguesa"
+                    checked={category === "hamburguesa"}
+                    onChange={(e) => setCategory(e.target.value)}
+                  />
+                  <Label htmlFor="hamburguesa" className="font-normal">
+                    Hamburguesa
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    value="extra"
+                    id="extra"
+                    checked={category === "extra"}
+                    onChange={(e) => setCategory(e.target.value)}
+                  />
+                  <Label htmlFor="extra" className="font-normal">
+                    Extra
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="price">Precio</Label>
+              <Input
+                id="price"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder="Precio del producto"
+              />
+            </div>
+
+            {formError && <p className="text-sm font-medium text-red-500">{formError}</p>}
+          </CardContent>
+
+          <CardFooter>
+            <Button type="submit" className="w-full bg-gebum-violet hover:bg-gebum-violet/90" disabled={isSubmitting}>
+              {isSubmitting ? "Creando..." : "Crear"}
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
+  )
 }

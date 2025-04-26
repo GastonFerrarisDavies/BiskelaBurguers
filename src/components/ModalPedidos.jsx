@@ -1,67 +1,105 @@
-import { CircleX } from 'lucide-react';
-import { useState, useContext } from 'react';
-import { CartContext } from '../context/CartContext.jsx';
+"use client"
 
-export function ModalPedidos ( {isOpen, closeModal, pSelected }) {
-    const [cantidad, setCantidad] = useState(1);
-    const { addToCart } = useContext(CartContext);
+import { CircleX, Minus, Plus } from "lucide-react"
+import { useState, useContext } from "react"
+import { CartContext } from "../context/CartContext"
 
-    const calcuPrecio = () => {
-            return pSelected.price * cantidad;
+export function ModalPedidos({ isOpen, closeModal, pSelected }) {
+  const [cantidad, setCantidad] = useState(1)
+  const [comment, setComment] = useState("")
+  const { addToCart } = useContext(CartContext)
+
+  const calculateTotal = () => {
+    return pSelected.price * cantidad
+  }
+
+  const decrementQuantity = () => {
+    if (cantidad > 1) {
+      setCantidad(cantidad - 1)
     }
+  }
 
-    const restarCantidad = () => {
-        if (cantidad >= 1) {
-            setCantidad(cantidad - 1);
-        }
-        else {
-            return null;
-        }
-    }
+  const incrementQuantity = () => {
+    setCantidad(cantidad + 1)
+  }
 
-    if (!isOpen) return null;
-    return (
-            <div className={` fixed inset-0 transition-colors ${isOpen ? 'visible bg-black/50' : 'hidden'}`}>
-                <div className="flex flex-col justify-center items-center mx-5 my-11 bg-gradient-to-br from-[#ececec] to-[#e6e6e6] rounded-lg shadow-md">
-                    <section className="flex flex-col justify-between">
-                        <div className="flex flex-row justify-around m-2">
-                            <h4 className="text-[2rem] font-extrabold">{pSelected.name}</h4>
-                            <button onClick={closeModal}>
-                            <CircleX color="#ff6961" size={25}/>
-                            </button>
-                        </div>
+  const handleAddToCart = () => {
+    addToCart(pSelected, cantidad, comment)
+    closeModal()
+    setCantidad(1)
+    setComment("")
+  }
 
-                        <div className="flex flex-col items-center">
+  if (!isOpen) return null
 
-                            <div className="flex flex-col mt-3 items-center justify-center">
-                                <p>Comentarios:</p>
-                                <input 
-                                type="text"
-                                name="comment"
-                                placeholder="Sin queso..."
-                                className="border-solid border-2 border-gray-700 rounded-md min-h-[100px] items-start" />
-                            </div>
-                            </div>
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+      aria-modal="true"
+      role="dialog"
+      aria-labelledby="modal-title"
+    >
+      <div className="w-full max-w-md bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-lg">
+        <div className="p-5">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <h2 id="modal-title" className="text-2xl font-bold">
+              {pSelected.name}
+            </h2>
+            <button
+              onClick={closeModal}
+              className="text-red-500 hover:text-red-700 transition-colors"
+              aria-label="Close modal"
+            >
+              <CircleX size={24} />
+            </button>
+          </div>
 
-                        <div className="flex flex-row justify-around items-center gap-5 m-2 pt-3">
-                            <button onClick={restarCantidad} className="bg-[#ff6961] text-white w-[40px] h-[35px] rounded-md hover:bg-[#ff6961] transition-colors text-[1.2rem]">
-                                -
-                            </button>
+          {/* Comment Section */}
+          <div className="mb-6">
+            <label htmlFor="comment" className="block mb-2 font-medium">
+              Comentarios:
+            </label>
+            <textarea
+              id="comment"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Sin queso..."
+              className="w-full min-h-[100px] p-3 border-2 border-gray-300 rounded-md focus:border-violet-500 focus:outline-none"
+            />
+          </div>
 
-                            <span className="font-bold text-[1.2rem]">Cantidad: {cantidad}</span>
+          {/* Quantity Controls */}
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <button
+              onClick={decrementQuantity}
+              className="flex items-center justify-center w-10 h-10 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors disabled:opacity-50"
+              disabled={cantidad <= 1}
+              aria-label="Decrease quantity"
+            >
+              <Minus size={20} />
+            </button>
 
-                            <button onClick={() => setCantidad(cantidad + 1)} className="bg-gebum-violet text-white w-[40px] h-[35px] rounded-md hover:bg-gebum-violet transition-colors text-[1.4rem]">
-                                +
-                            </button>
-                            
-                        </div>
-                    </section>
-                        <button onClick={() => {
-                            addToCart(pSelected, cantidad);
-                            closeModal();
-                            setCantidad(1);
-                        }} className="mx-auto my-4 w-[80%] bg-gebum-violet text-white py-2 rounded-md hover:bg-gebum-violet transition-colors">Agregar ${calcuPrecio()}</button>
-                </div>
-            </div>
-    )
+            <span className="font-bold text-xl">Cantidad: {cantidad}</span>
+
+            <button
+              onClick={incrementQuantity}
+              className="flex items-center justify-center w-10 h-10 bg-gebum-violet text-white rounded-md hover:bg-violet-700 transition-colors"
+              aria-label="Increase quantity"
+            >
+              <Plus size={20} />
+            </button>
+          </div>
+
+          {/* Add to Cart Button */}
+          <button
+            onClick={handleAddToCart}
+            className="w-full py-3 bg-gebum-violet text-white text-lg font-medium rounded-md hover:bg-violet-700 transition-colors"
+          >
+            Agregar ${calculateTotal().toFixed(2)}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }

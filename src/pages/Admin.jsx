@@ -2,10 +2,12 @@ import supabase from '../config/supabaseClient'
 import { useState, useEffect } from 'react'
 import { PencilLine, ArrowBigDownDash } from 'lucide-react';
 import { ModalCrear } from '../components/ModalCrear.jsx';
+import { ModalEditar } from '../components/ModalEditar.jsx';
 
 
 export default function Admin() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenCrear, setIsOpenCrear] = useState(false);
+  const [isOpenEditar, setIsOpenEditar] = useState(false);
   const [data, setData] = useState([]);
 
   useEffect(() => {
@@ -55,7 +57,8 @@ export default function Admin() {
           ))}
         </div>
       </div>
-      <ModalCrear isOpen={isOpen} closeModal={ () => setIsOpen(false) } />
+      <ModalCrear isOpen={isOpenCrear} closeModal={ () => setIsOpenCrear(false) } />
+      <ModalEditar isOpen={isOpenEditar} closeModal={ () => setIsOpenEditar(false) } />
     </>
   );
 }
