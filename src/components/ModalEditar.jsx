@@ -6,45 +6,49 @@ import CardHeader from './CardHeader';
 import CardTitle from './CardTitle';
 import CardContent from './CardContent';
 import CardFooter from './CardFooter';
+import { CircleX } from "lucide-react";
+import Button from './Button';
+import Label from './Label';
+import Input from './Input';
+import RadioGroup from './RadioGroup';
+import RadioGroupItem from './RadioGroupItem';
 
-const ModalEditar = ({ pSelected, isOpen, closeModal }) => {
+export default function ModalEditar ({ pSelected, isOpen, closeModal }) {
   const [editedProduct, setEditedProduct] = useState({
-    id: pSelected?.id || null,
-    name: pSelected?.name || '',
-    category: pSelected?.category || '',
-    price: pSelected?.price || '',
+    id: pSelected?.id,
+    name: pSelected?.name,
+    category: pSelected?.category,
+    price: pSelected?.price,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Función para manejar los cambios en los campos del formulario
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setEditedProduct((prevProduct) => ({
-      ...prevProduct,
-      [name]: value,
-    }));
-  };
 
-  // Función para actualizar el producto en la base de datos de Supabase
   const updateProduct = async () => {
     setLoading(true);
     setError(null);
 
     const { data, error } = await supabase
       .from('Producto')
-      .update(editedProduct)
+      .update({name: editedProduct.name, category: editedProduct.category, price: editedProduct.price})
       .eq('id', editedProduct.id)
+      .select(); // Es buena práctica seleccionar los datos actualizados
 
     setLoading(false);
+    console.log("Datos de actualización:", data);
+    console.log("Error de actualización:", error);
 
-    if (error) {
+    if (error || !data) {
       console.error('Error al actualizar el producto:', error);
       setError('Hubo un error al intentar actualizar el producto.');
     } else {
       console.log('Producto actualizado exitosamente:', data);
-      setSelectedProduct(null);
-      setEditedProduct({ id: null, name: '', category: '', price: '', image: '' });
+      // No necesitas setSelectedProduct(null) aquí
+      setEditedProduct({ id: null, name: '', category: '', price: '' });
+      // Llama a una función que se pase desde el padre para notificar la actualización
+      if (closeModal) {
+        closeModal(data[0]); // Puedes pasar los datos actualizados al padre si es necesario
+      }
     }
   };
 
@@ -72,14 +76,14 @@ const ModalEditar = ({ pSelected, isOpen, closeModal }) => {
               <Input
                 id="name"
                 value={editedProduct.name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Nombre del producto"
+                onChange={(e) => setEditedProduct({ ...editedProduct, name: e.target.value })}
+                placeholder={pSelected.name}
               />
             </div>
 
             <div className="space-y-2">
               <Label>Categoría</Label>
-              <RadioGroup value={category} onValueChange={setCategory} className="flex flex-col space-y-1">
+              <RadioGroup value={editedProduct.category} onValueChange={setEditedProduct} className="flex flex-col space-y-1">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
                     value="hamburguesa"
@@ -111,7 +115,7 @@ const ModalEditar = ({ pSelected, isOpen, closeModal }) => {
                 id="price"
                 value={editedProduct.price}
                 onChange={(e) => setEditedProduct({ ...editedProduct, price: e.target.value })}
-                placeholder="Precio del producto"
+                placeholder={pSelected.price}
               />
             </div>
 
@@ -128,5 +132,3 @@ const ModalEditar = ({ pSelected, isOpen, closeModal }) => {
     </div>
   );
 };
-
-export default ModalEditar;
