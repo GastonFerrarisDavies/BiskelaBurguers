@@ -9,14 +9,12 @@ import Registro from './pages/Registro';
 import NotFound from './pages/NotFound';
 import MiCuenta from './pages/MiCuenta';
 import { CartProvider } from './context/Cart';
-import { AuthProvider } from './context/sesion';
 import './App.css'
 
 export function App() {
 
   return (
     <CartProvider>
-    <AuthProvider>
     <>
     <Router>
       <Routes>
@@ -31,7 +29,6 @@ export function App() {
       </Routes>
     </Router>
     </>
-    </AuthProvider>
     </CartProvider>
   )
 }

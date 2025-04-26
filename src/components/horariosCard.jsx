@@ -2,17 +2,21 @@ import './card-a.css'
 import { User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../config/supabaseClient';
+import { AuthContext } from '../context/AuthContext';
+import { useContext } from 'react';
 
 
 export function Horarios () {
 
-  const handleClick = async () => {
-    if (supabase.auth.getSession()) {
-      navigate('/micuenta')
-    }
-    else {
-      navigate('/InicioSesion')
-    }
+  const { session } = useContext(AuthContext);
+
+  const handleClick = () => {
+      if (session) {
+        navigate('/micuenta')
+      }
+      else {
+        navigate('/InicioSesion')
+      }
   }
 
     const navigate = useNavigate();

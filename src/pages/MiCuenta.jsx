@@ -1,85 +1,61 @@
-import { useState, useEffect } from "react"
-import supabase from "../config/supabaseClient"
-import { useNavigate } from "react-router-dom"
-import { ArrowLeftFromLine } from "lucide-react"
+// src/pages/ProfilePage.jsx
+import React, { useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom'
+import { AuthContext } from '../context/AuthContext';
+import { ArrowLeftFromLine } from 'lucide-react';
+import { ModalDireccion } from '../components/ModalDireccion';
 
-export default function MiCuenta() {
-  const [userData, setUserData] = useState(null);
-  const [direcciones, setDirecciones] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [nombre, setNombre] = useState('');
-  const [mail, setMail] = useState('');
-  const [id, setId] = useState('');
-  const userID = 5
-  const navigate = useNavigate();
+const ProfilePage = () => {
+  const { logOut, session, user, loading } = useContext(AuthContext);
+  const navigate = useNavigate()
+  const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    console.log("Ejecuta useEffect")
-    fetchUserData();
-  }, []);
+  const handleClick = () => {
+    console.log("hola")
+    logOut()
+    navigate('/')
+  }
 
-  const fetchUserData = async () => {
-    try {
-      console.log("ejecuta try")
-      console.log("userID:", userID); // Verifica el valor de userID
+  if (loading) {
+    return <p>Cargando información del usuario...</p>;
+  }
 
-      const { data, error: userError } = await supabase
-        .from('Usuario')
-        .select('id, nombre, mail')
-        .eq('id', userID);
-
-      if (userError) {
-        console.error("Error fetching user data:", userError);
-        setError(userError.message);
-        return; // Detener la ejecución si hay un error
-      }
-
-      if (data) {
-        console.log("User data:", data);
-        setId(data.id);
-        setNombre(data.nombre);
-        setMail(data.mail);
-        setUserData(data);
-      } else {
-        console.log("No user data found for userID:", userID);
-      }
-
-      const { data: direccionesData, error: direccionError } = await supabase
-        .from('Direccion')
-        .select('*')
-        .eq('usuario_id', userID);
-
-      if (direccionError) {
-        console.error("Error fetching direcciones:", direccionError);
-        setError(direccionError.message);
-        return; // Detener la ejecución si hay un error
-      }
-
-      console.log("Direcciones data:", direccionesData);
-      setDirecciones(direccionesData);
-
-    } catch (error) {
-      console.error("Unexpected error:", error);
-      setError(error.message);
-    }
-  };
-
-  
-
-
+  if (!session) {
+    return <p>No estás autenticado. Redirige a la página de inicio de sesión.</p>;
+  }
 
   return (
     <>
-      <header>
-        <div className="absolute flex flex-row justify-between align-center w-screen p-3 bg-gebum-violet">
-        <span className="text-white font-extrabold text-[1.3rem]" onClick={() => {navigate('/')}} >Biskela</span>
+    <header>
+      <div className="flex flex-row justify-between align-center w-screen p-3 bg-gebum-violet">
+        <span className="text-white font-extrabold text-[1.3rem]" onClick={ () => {navigate('/')}} >Biskela</span>
         <div className="flex flex-row gap-2">
           <ArrowLeftFromLine className="" onClick={() => navigate(-1)} color="white" size={30} />
         </div>
+      </div>
+    </header>
+    <div>
+      <div className="flex flex-col gap-2 m-2 items-center align-center">
+        <div className="flex flex-col align-center items-center">
+          <h2 className="font-semibold text-[1.3rem]">Hola! {user?.email}</h2>
+          <h4 className="font-semibold text-[1rem]">Bienvenido al panel de editor de usuario.</h4>
         </div>
-      </header>
 
+      </div>
+    </div>
+
+    <div className="flex flex-col gap-2 m-2">
+      <button onClick={ () => {setIsOpen(true)}} className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gebum-violet focus:outline-none focus:ring-2 focus:ring-offset-2">
+        Añadir dirección
+      </button>
+      <button onClick={ () => {handleClick()}} className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-400 focus:outline-none focus:ring-2 focus:ring-offset-2">
+        Cerrar sesión
+      </button>
+    </div>
+    <ModalDireccion isOpen={isOpen} closeModal={() => setIsOpen(false)} />
     </>
+
   );
-}
+};
+
+export default ProfilePage;
