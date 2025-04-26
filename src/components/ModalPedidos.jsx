@@ -1,6 +1,6 @@
 import { CircleX } from 'lucide-react';
 import { useState, useContext } from 'react';
-import { CartContext } from '../context/Cart.jsx';
+import { CartContext } from '../context/CartContext.jsx';
 
 export function ModalPedidos ( {isOpen, closeModal, pSelected }) {
     const [cantidad, setCantidad] = useState(1);

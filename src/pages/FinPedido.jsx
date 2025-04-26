@@ -1,114 +1,110 @@
-import { CartContext } from '../context/Cart.jsx';
-import { useContext, useState, useEffect } from 'react';
-import { ArrowLeftFromLine } from 'lucide-react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { CartContext } from '../context/CartContext';
+import { AuthContext } from '../context/AuthContext';
+import supabase from '../config/supabaseClient';
+import NavBar from '../components/NavBar';
 
 export default function FinPedido() {
-    const { cart } = useContext(CartContext);
-    const [total, setTotal] = useState(0);
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { cart } = useContext(CartContext);
+  const { session, user } = useContext(AuthContext);
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        calcuTotal(); 
-    }, [cart]);
+  useEffect(() => {
+    if (!session) {
+      navigate('/InicioSesion');
+      return;
+    }
+    if (cart.length === 0) {
+      return;
+    }
+  }, [session, user, navigate, cart]);
 
-    const calcuTotal = () => {
-        let totalCalcu = 0;
-        cart.forEach(product => {
-            totalCalcu += product.price * product.quantity;
-        });
-        setTotal(totalCalcu);
-    };
+  const calculateTotal = () => {
+    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
 
+  if (loading) {
     return (
-        <>
-        <header>
-                <div className="flex flex-row justify-between align-center w-screen p-3 bg-gebum-violet">
-                <span className="text-white font-extrabold text-[1.3rem]" onClick={() => {navigate('/')}} >Finalizar Pedido</span>
-                <div className="flex flex-row gap-2">
-                  <ArrowLeftFromLine className="" onClick={() => navigate(-1)} color="white" size={30} />
-                </div>
-                </div>
-            </header>
-        <div className="bg-gray-100">
-            <div className="max-w-3xl mx-auto bg-white shadow-md rounded-md p-8">
-
-                {cart.length === 0 ? (
-                    <p className="text-gray-600">Tu carrito está vacío.</p>
-                ) : (
-                    <div className="mb-6">
-                        <h2 className="text-lg font-semibold mb-3 text-gray-700">Productos en tu carrito:</h2>
-                        <ul>
-                            {cart.map(product => (
-                                <li key={product.id} className="flex items-center justify-between py-2 border-b border-gray-200">
-                                    <div className="flex items-center">
-                                        <img src={product.image} alt={product.name} className="w-12 h-12 object-cover rounded mr-4" />
-                                        <div>
-                                            <p className="text-gray-700 font-semibold">{product.name}</p>
-                                            <p className="text-gray-500 text-sm">Cantidad: {product.quantity}</p>
-                                        </div>
-                                    </div>
-                                    <span className="text-gray-700">${(product.price * product.quantity).toFixed(2)}</span>
-                                </li>
-                            ))}
-                        </ul>
-                        <div className="mt-4 pt-4 border-t border-gray-200">
-                            <p className="flex justify-between font-semibold text-gray-800">
-                                Total: <span>${total.toFixed(2)}</span>
-                            </p>
-                        </div>
-                    </div>
-                )}
-
-                <div className="mb-6">
-                    <h2 className="text-lg font-semibold mb-3 text-gray-700">Información de Envío:</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label htmlFor="nombre" className="block text-gray-700 text-sm font-bold mb-2">Nombre:</label>
-                            <input type="text" id="nombre" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                        </div>
-                        <div>
-                            <label htmlFor="apellido" className="block text-gray-700 text-sm font-bold mb-2">Apellido:</label>
-                            <input type="text" id="apellido" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                        </div>
-                        <div>
-                            <label htmlFor="direccion" className="block text-gray-700 text-sm font-bold mb-2">Dirección:</label>
-                            <input type="text" id="direccion" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                        </div>
-                        <div>
-                            <label htmlFor="ciudad" className="block text-gray-700 text-sm font-bold mb-2">Ciudad:</label>
-                            <input type="text" id="ciudad" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                        </div>
-                        <div>
-                            <label htmlFor="provincia" className="block text-gray-700 text-sm font-bold mb-2">Provincia:</label>
-                            <input type="text" id="provincia" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                        </div>
-                        <div>
-                            <label htmlFor="codigoPostal" className="block text-gray-700 text-sm font-bold mb-2">Código Postal:</label>
-                            <input type="text" id="codigoPostal" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="mb-6">
-                    <h2 className="text-lg font-semibold mb-3 text-gray-700">Método de Pago:</h2>
-                    <div className="space-y-2">
-                        <label className="inline-flex items-center">
-                            <input type="radio" className="form-radio" name="metodoPago" value="tarjeta" />
-                            <span className="ml-2 text-gray-700">Tarjeta de Crédito</span>
-                        </label>
-                        <label className="inline-flex items-center">
-                            <input type="radio" className="form-radio" name="metodoPago" value="efectivo" />
-                            <span className="ml-2 text-gray-700">Efectivo al recibir</span>
-                        </label>
-                    </div>
-                </div>
-
-                <button className="bg-gebum-violet hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                    Confirmar Pedido
-                </button>
-            </div>
+      <>
+        <NavBar />
+        <div className="flex justify-center items-center h-screen">
+          <p>Cargando información del pedido...</p>
         </div>
-        </>
+      </>
     );
+  }
+
+  return (
+    <>
+      <NavBar />
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-8">Resumen del Pedido</h1>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Información del Carrito */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold mb-4">Tu Pedido</h2>
+            {cart.map((item) => (
+              <div key={item.id} className="flex justify-between items-center mb-4 pb-4 border-b">
+                <div>
+                  <h3 className="font-medium">{item.name}</h3>
+                  <p className="text-gray-600">Cantidad: {item.quantity}</p>
+                </div>
+                <p className="font-semibold">${item.price * item.quantity}</p>
+              </div>
+            ))}
+            <div className="flex justify-between items-center mt-4 pt-4 border-t">
+              <h3 className="text-xl font-bold">Total</h3>
+              <p className="text-xl font-bold">${calculateTotal()}</p>
+            </div>
+          </div>
+
+          {/* Información del Usuario */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold mb-4">Información de Entrega</h2>
+            <div className="space-y-4">
+              <div>
+                <p className="text-gray-600">Email</p>
+                <p className="font-medium">{user.email}</p>
+              </div>
+              {userData?.direccion && (
+                <div>
+                  <p className="text-gray-600">Dirección</p>
+                  <p className="font-medium">{userData.direccion}</p>
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => navigate('/MiCuenta')}
+              className="mt-6 w-full bg-gebum-violet text-white py-2 rounded-md hover:bg-gebum-violet transition-colors"
+            >
+              Actualizar Información
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={() => navigate('/Products')}
+            className="bg-gray-500 text-white px-6 py-2 rounded-md mr-4 hover:bg-gray-600 transition-colors"
+          >
+            Volver
+          </button>
+          <button
+            className="bg-green-700 text-white px-6 py-2 rounded-md hover:bg-gebum-violet transition-colors"
+            onClick={() => {
+              // Aquí se puede agregar la lógica para procesar el pedido
+              alert('Pedido realizado con éxito');
+              navigate('/');
+            }}
+          >
+            Confirmar Pedido
+          </button>
+        </div>
+      </div>
+    </>
+  );
 }

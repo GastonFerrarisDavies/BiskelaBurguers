@@ -5,10 +5,18 @@
 
 
 .g-image {
-    background-image: url('https://png.pngtree.com/png-clipart/20230928/original/pngtree-burger-png-images-png-image_13164941.png');
-    background-size: contain;
-    width: 15rem;
-    height: 15rem;
+    background-image: url('../public/homepedido.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    transition: .3s ease-in-out;
+}
+
+.g-image:hover {
+    transform: scale(1.05);
 }
 
 

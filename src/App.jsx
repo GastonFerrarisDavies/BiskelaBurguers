@@ -8,28 +8,25 @@ import InicioSesion from './pages/InicioSesion';
 import Registro from './pages/Registro';
 import NotFound from './pages/NotFound';
 import MiCuenta from './pages/MiCuenta';
-import { CartProvider } from './context/Cart';
 import './App.css'
 
 export function App() {
 
   return (
-    <CartProvider>
     <>
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/products" element={<Products />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/Products" element={<Products />} />
+        <Route path="/Admin" element={<Admin />} />
         <Route path="/FinPedido" element={<FinPedido />} />
         <Route path="/InicioSesion" element={<InicioSesion />} />
         <Route path="/Registro" element={<Registro />} />
         <Route path="*" element={<NotFound />} />
-        <Route path="/micuenta" element={<MiCuenta />} />
+        <Route path="/MiCuenta" element={<MiCuenta />} />
       </Routes>
     </Router>
     </>
-    </CartProvider>
   )
 }
  
