@@ -9,17 +9,69 @@ export default function FinPedido() {
   const navigate = useNavigate();
   const { cart } = useContext(CartContext);
   const { session, user } = useContext(AuthContext);
-  const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [direcciones, setDirecciones] = useState([]);
+  const [direccionSeleccionada, setDireccionSeleccionada] = useState('');
+  const [metodoPago, setMetodoPago] = useState('');
 
   useEffect(() => {
     if (cart.length === 0) {
       return;
     }
+    if (user?.id) {
+      fetchDirecciones();
+    }
   }, [session, user, cart]);
+
+  const fetchDirecciones = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("Direccion")
+        .select("*")
+        .eq("userID", user.id);
+      if (error) {
+        throw error;
+      }
+      setDirecciones(data || []);
+      if (data && data.length > 0) {
+        setDireccionSeleccionada(data[0].id);
+      }
+    } catch (err) {
+      console.error("Error al obtener direcciones:", err.message);
+      setDirecciones([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const calculateTotal = () => {
     return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
+  const handleDireccionChange = (event) => {
+    setDireccionSeleccionada(event.target.value);
+  };
+
+  const handleMetodoPagoChange = (event) => {
+    setMetodoPago(event.target.value);
+  };
+
+  const handleConfirmarPedido = () => {
+    if (!direccionSeleccionada) {
+      alert('Por favor, selecciona una dirección de entrega.');
+      return;
+    }
+    if (!metodoPago) {
+      alert('Por favor, selecciona un método de pago.');
+      return;
+    }
+
+    const direccionEntrega = direcciones.find(dir => dir.id === direccionSeleccionada);
+    console.log('Pedido a realizar a la dirección:', direccionEntrega);
+    console.log('Método de pago seleccionado:', metodoPago);
+    alert(`Pedido realizado con éxito a la dirección seleccionada mediante ${metodoPago}.`);
+    navigate('/');
   };
 
   if (loading) {
@@ -38,7 +90,7 @@ export default function FinPedido() {
       <NavBar />
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8">Resumen del Pedido</h1>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Información del Carrito */}
           <div className="bg-white rounded-lg shadow-md p-6">
@@ -57,23 +109,56 @@ export default function FinPedido() {
               <p className="text-xl font-bold">${calculateTotal()}</p>
             </div>
           </div>
-            {/* Información del Usuario */}
+          {/* Información de Entrega y Pago */}
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">Información de Entrega</h2>
+            <h2 className="text-xl font-semibold mb-4">Información de Entrega y Pago</h2>
             <div className="space-y-4">
               <div>
                 <p className="text-gray-600">Email</p>
-                <p className="font-medium">{user.email}</p>
+                <p className="font-medium">{user?.email}</p>
+              </div>
+              <div>
+                <label htmlFor="direccion" className="block text-gray-700 text-sm font-bold mb-2">
+                  Seleccionar Dirección de Entrega:
+                </label>
+                <select
+                  id="direccion"
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  value={direccionSeleccionada}
+                  onChange={handleDireccionChange}
+                >
+                  <option value="" disabled>Selecciona una dirección</option>
+                  {direcciones.map((direccion) => (
+                    <option key={direccion.id} value={direccion.id}>
+                      {direccion.calle} {direccion.numero}, {direccion.entreCalle1} y {direccion.entreCalle2}
+                    </option>
+                  ))}
+                  {direcciones.length === 0 && <option disabled>No hay direcciones guardadas</option>}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="metodoPago" className="block text-gray-700 text-sm font-bold mb-2">
+                  Seleccionar Método de Pago:
+                </label>
+                <select
+                  id="metodoPago"
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  value={metodoPago}
+                  onChange={handleMetodoPagoChange}
+                >
+                  <option value="" disabled>Selecciona un método de pago</option>
+                  <option value="efectivo">Efectivo</option>
+                  <option value="transferencia">Transferencia</option>
+                </select>
               </div>
             </div>
             <button
               onClick={() => navigate('/MiCuenta')}
               className="mt-6 w-full bg-gebum-violet text-white py-2 rounded-md hover:bg-gebum-violet transition-colors"
             >
-              Actualizar Información
+              Administrar Direcciones
             </button>
           </div>
-          
         </div>
 
         <div className="mt-8 flex justify-center">
@@ -85,10 +170,8 @@ export default function FinPedido() {
           </button>
           <button
             className="bg-green-700 text-white px-6 py-2 rounded-md hover:bg-gebum-violet transition-colors"
-            onClick={() => {
-              alert('Pedido realizado con éxito');
-              navigate('/');
-            }}
+            onClick={handleConfirmarPedido}
+            disabled={direcciones.length === 0 || !metodoPago}
           >
             Confirmar Pedido
           </button>
