@@ -13,14 +13,10 @@ export default function FinPedido() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!session) {
-      navigate('/InicioSesion');
-      return;
-    }
     if (cart.length === 0) {
       return;
     }
-  }, [session, user, navigate, cart]);
+  }, [session, user, cart]);
 
   const calculateTotal = () => {
     return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
@@ -61,8 +57,7 @@ export default function FinPedido() {
               <p className="text-xl font-bold">${calculateTotal()}</p>
             </div>
           </div>
-
-          {/* Información del Usuario */}
+            {/* Información del Usuario */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold mb-4">Información de Entrega</h2>
             <div className="space-y-4">
@@ -70,12 +65,6 @@ export default function FinPedido() {
                 <p className="text-gray-600">Email</p>
                 <p className="font-medium">{user.email}</p>
               </div>
-              {userData?.direccion && (
-                <div>
-                  <p className="text-gray-600">Dirección</p>
-                  <p className="font-medium">{userData.direccion}</p>
-                </div>
-              )}
             </div>
             <button
               onClick={() => navigate('/MiCuenta')}
@@ -84,6 +73,7 @@ export default function FinPedido() {
               Actualizar Información
             </button>
           </div>
+          
         </div>
 
         <div className="mt-8 flex justify-center">
@@ -96,7 +86,6 @@ export default function FinPedido() {
           <button
             className="bg-green-700 text-white px-6 py-2 rounded-md hover:bg-gebum-violet transition-colors"
             onClick={() => {
-              // Aquí se puede agregar la lógica para procesar el pedido
               alert('Pedido realizado con éxito');
               navigate('/');
             }}

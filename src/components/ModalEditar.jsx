@@ -23,45 +23,49 @@ export default function ModalEditar ({ pSelected, isOpen, closeModal }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-
-  const updateProduct = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setLoading(true);
     setError(null);
 
-    const { data, error } = await supabase
-      .from('Producto')
-      .update({name: editedProduct.name, category: editedProduct.category, price: editedProduct.price})
-      .eq('id', editedProduct.id)
-      .select(); // Es buena práctica seleccionar los datos actualizados
+    try {
+        console.log("el producto es: ", editedProduct)
+      const { data, error } = await supabase
+        .from('Producto')
+        .update({
+          name: editedProduct.name,
+          category: editedProduct.category,
+          price: editedProduct.price
+        })
+        .eq('id', editedProduct.id)
+        .select();
 
-    setLoading(false);
-    console.log("Datos de actualización:", data);
-    console.log("Error de actualización:", error);
+      if (error) {
+        throw error;
+      }
 
-    if (error || !data) {
+      setEditedProduct({ id: null, name: '', category: '', price: '' });
+      if (closeModal) {
+        closeModal(data[0]);
+      }
+    } catch (error) {
       console.error('Error al actualizar el producto:', error);
       setError('Hubo un error al intentar actualizar el producto.');
-    } else {
-      console.log('Producto actualizado exitosamente:', data);
-      // No necesitas setSelectedProduct(null) aquí
-      setEditedProduct({ id: null, name: '', category: '', price: '' });
-      // Llama a una función que se pase desde el padre para notificar la actualización
-      if (closeModal) {
-        closeModal(data[0]); // Puedes pasar los datos actualizados al padre si es necesario
-      }
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div
-        className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ${
-            isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ${
+        isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+      }`}
     >
-        <div className="absolute inset-0 bg-black/50" onClick={closeModal} />
-        <Card className="relative w-full max-w-md mx-4 shadow-lg">
+      <div className="absolute inset-0 bg-black/50" onClick={closeModal} />
+      <Card className="relative w-full max-w-md mx-4 shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-xl font-bold">Editar producto</CardTitle>
           <Button variant="ghost" size="icon" onClick={closeModal} className="h-8 w-8 rounded-full">
@@ -69,7 +73,7 @@ export default function ModalEditar ({ pSelected, isOpen, closeModal }) {
           </Button>
         </CardHeader>
 
-        <form onSubmit={updateProduct}>
+        <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4 pt-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nombre</Label>
@@ -83,13 +87,21 @@ export default function ModalEditar ({ pSelected, isOpen, closeModal }) {
 
             <div className="space-y-2">
               <Label>Categoría</Label>
-              <RadioGroup value={editedProduct.category} onValueChange={setEditedProduct} className="flex flex-col space-y-1">
+              <RadioGroup 
+                value={editedProduct.category} 
+                onValueChange={(value) => {
+                  console.log("Valor seleccionado:", value);
+                  setEditedProduct(prev => ({
+                    ...prev,
+                    category: value
+                  }));
+                }}
+                className="flex flex-col space-y-1"
+              >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
                     value="hamburguesa"
                     id="hamburguesa"
-                    checked={editedProduct.category === "hamburguesa"}
-                    onChange={(e) => setEditedProduct({ ...editedProduct, category: e.target.value })}
                   />
                   <Label htmlFor="hamburguesa" className="font-normal">
                     Hamburguesa
@@ -99,8 +111,6 @@ export default function ModalEditar ({ pSelected, isOpen, closeModal }) {
                   <RadioGroupItem
                     value="extra"
                     id="extra"
-                    checked={editedProduct.category === "extra"}
-                    onChange={(e) => setEditedProduct({ ...editedProduct, category: e.target.value })}
                   />
                   <Label htmlFor="extra" className="font-normal">
                     Extra
@@ -113,6 +123,7 @@ export default function ModalEditar ({ pSelected, isOpen, closeModal }) {
               <Label htmlFor="price">Precio</Label>
               <Input
                 id="price"
+                type="number"
                 value={editedProduct.price}
                 onChange={(e) => setEditedProduct({ ...editedProduct, price: e.target.value })}
                 placeholder={pSelected.price}

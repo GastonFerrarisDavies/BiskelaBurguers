@@ -1,92 +1,134 @@
-import { CircleX } from 'lucide-react';
-import { useState } from 'react';
-import supabase from '../config/supabaseClient.js';
+"use client"
 
-export function ModalDireccion ({isOpen, closeModal}) {
-    const [name, setName] = useState('');
-    const [category, setCategory] = useState('');
-    const [price, setPrice] = useState('');
-    const [formError, setFormError] = useState(null);
+import { useState, useContext } from "react"
+import { CircleX } from "lucide-react"
+import supabase from "../config/supabaseClient"
+import CardHeader from "./CardHeader"
+import Button from "./Button"
+import Label from "./Label"
+import Input from "./Input"
+import RadioGroup from "./RadioGroup"
+import RadioGroupItem from "./RadioGroupItem"
+import Card from "./Card"
+import CardTitle from "./CardTitle"
+import CardContent from "./CardContent"
+import CardFooter from "./CardFooter"
+import { AuthContext } from "../context/AuthContext"
 
-    const sumbitCreate = async (e) => {
-        e.preventDefault();
-        console.log(name, category, price);
+export function ModalDireccion({ isOpen, closeModal }) {
+  const [calle, setCalle] = useState("")
+  const [numero, setNumero] = useState("")
+  const [entrecalle1, setEntrecalle1] = useState("")
+  const [entrecalle2, setEntrecalle2] = useState("")
+  const [formError, setFormError] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const { user } = useContext(AuthContext)
 
-        if ( !name || !category || !price) {
-            setFormError('Todos los campos son obligatorios');
-        }
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setFormError(null)
 
-        if ( name && category && price ) {
-            const { data, error } = await supabase
-            .from('Producto')
-            .insert([
-                { name, category, price }
-            ])
-            setName('');
-            setCategory('');
-            setPrice('');
-            closeModal();
-            alert('Producto creado con éxito');
-            if (error) {
-                setFormError(error)
-            }
-            else {
-                {closeModal}
-            }
-        }
+    if (!calle || !numero || !entrecalle1 || !entrecalle2) {
+      setFormError("Todos los campos son obligatorios")
+      return
     }
 
-    if (!isOpen) return null;
-    return (
-        <>
-            <div className={` fixed inset-0 transition-colors ${isOpen ? 'visible bg-black/50' : 'hidden'}`}>
-                <div className="flex flex-col justify-center items-center mx-5 my-11 bg-gradient-to-br from-[#ececec] to-[#e6e6e6] rounded-lg shadow-md p-1">
-                    <div className="flex flex-row justify-around m-2 gap-2">
-                        <h4 className="text-[1.2rem] font-extrabold">Crear producto</h4>
-                        <button onClick={closeModal}>
-                            <CircleX color="#ff6961" size={25} />
-                        </button>
-                    </div>
-                    
-                    <div className="flex flex-col gap-3">
-                        <form onSubmit={ sumbitCreate } className="flex flex-col gap-3">
-                            <fieldset className="border-2 border-gray-700 rounded-md p-2">
-                                <legend className="p-1">Calle: </legend>
-                                <input className="rounded-md p-1" type="text"
-                                id="name"
-                                value={name}
-                                onChange={(e) => setCalle(e.target.value)} />
-                            </fieldset>
-                            
+    try {
+      setIsSubmitting(true)
 
-                            <fieldset className="border-2 border-gray-700 rounded-md p-2">
-                            <legend className="p-1">Número:</legend>
+      const { error } = await supabase.from("Direccion").insert([{ calle: calle, numero: numero, entreCalle1: entrecalle1, entreCalle2: entrecalle2, userID: user.id }])
 
-                            <div>
-                                <input type="radio" id="hamburguesa" name="category" value="hamburguesa" checked={category === 'hamburguesa'} onChange={(e) => setCategory(e.target.value)} />
-                                <label for="hamburguesa">Hamburguesa</label>
-                            </div>
+      if (error) {
+        throw error
+      }
 
-                            <div>
-                                <input type="radio" id="extra" name="category" value="extra" checked={category === 'extra'} onChange={(e) => setCategory(e.target.value)} />
-                                <label for="extra">Extra</label>
-                            </div>
-                            </fieldset>
+      setCalle("")
+      setNumero("")
+      setEntrecalle1("")
+      setEntrecalle2("")
+      setSuccess(true)
+      setTimeout(() => {
+        closeModal()
+      }, 2000)
+    } catch (error) {
+      setFormError("Error al crear el producto")
+      console.error(error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
-                            <fieldset className="border-2 border-gray-700 rounded-md p-2">
-                                <legend className="p-1">Precio: </legend>
-                                <input className="rounded-md p-1" type="text"
-                                id="price"
-                                value={price}
-                                onChange={(e) => setPrice(e.target.value)} />
-                            </fieldset>
-                            {formError && <p className="text-red-500">{ formError }</p>}
-                            <button className="m-4 w-full bg-gebum-violet text-white p-2 rounded-md hover:bg-gebum-violet transition-colors">
-                                Crear
-                            </button>
-                        </form>
-                    </div>
-                </div>
+  if (!isOpen) return null
+
+  return (
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ${
+        isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+      }`}
+    >
+      <div className="absolute inset-0 bg-black/50" onClick={closeModal} />
+
+      <Card className="relative w-full max-w-md mx-4 shadow-lg">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-xl font-bold">Añadir dirección</CardTitle>
+          <Button variant="ghost" size="icon" onClick={closeModal} className="h-8 w-8 rounded-full">
+            <CircleX className="h-5 w-5 text-red-500" />
+          </Button>
+        </CardHeader>
+
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="calle">Calle</Label>
+              <Input
+                id="calle"
+                value={calle}
+                onChange={(e) => setCalle(e.target.value)}
+                placeholder="123"
+              />
             </div>
-        </>)
+
+            <div className="space-y-2">
+              <Label htmlFor="numero">Número</Label>
+              <Input
+                id="numero"
+                value={numero}
+                onChange={(e) => setNumero(e.target.value)}
+                placeholder="1400"
+              />
+            </div>
+
+            <div className="space-y-2 flex flex-row gap-2 items-center">
+              <Label htmlFor="entrecalle1">Entrecalles</Label>
+              <div className="flex flex-row gap-2">
+              <Input
+                id="entrecalle1"
+                value={entrecalle1}
+                onChange={(e) => setEntrecalle1(e.target.value)}
+                placeholder="123"
+              />
+              <Input
+                id="entrecalle2"
+                value={entrecalle2}
+                onChange={(e) => setEntrecalle2(e.target.value)}
+                placeholder="123"
+              />
+              </div>
+              
+            </div>
+
+            {formError && <p className="text-sm font-medium text-red-500">{formError}</p>}
+            {success && <p className="text-sm font-medium text-green-500">Dirección añadida correctamente</p>}
+          </CardContent>
+
+          <CardFooter>
+            <Button type="submit" className="w-full bg-gebum-violet hover:bg-gebum-violet/90" disabled={isSubmitting}>
+              {isSubmitting ? "Añadiendo..." : "Añadir mi dirección"}
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
+  )
 }

@@ -1,17 +1,38 @@
 // src/pages/ProfilePage.jsx
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext';
 import { ArrowLeftFromLine } from 'lucide-react';
 import { ModalDireccion } from '../components/ModalDireccion';
+import supabase from '../config/supabaseClient';
+
 
 const ProfilePage = () => {
   const { logOut, session, user, loading } = useContext(AuthContext);
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false);
+  const [direcciones, setDirecciones] = useState([])
+
+  useEffect(() => {
+
+    if (!user) {
+      navigate('/')
+      return
+    }
+
+    const fetchDirecciones = async () => {
+      console.log(user.id)
+      const { data, error } = await supabase.from("Direccion").select("*").eq("userID", user.id)
+      if (error) {
+        throw error
+      }
+      console.log(data)
+      setDirecciones(data)
+    }
+    fetchDirecciones()
+  }, [user.id])
 
   const handleClick = () => {
-    console.log("hola")
     logOut()
     navigate('/')
   }
@@ -42,6 +63,17 @@ const ProfilePage = () => {
         </div>
 
       </div>
+    </div>
+
+    <div className="flex flex-col gap-2 m-2 items-center align-center justify-center">
+      {direcciones.map((direccion) => (
+        <div key={direccion.id} className="flex flex-col gap-2 m-2 items-center align-center justify-center bg-black-100 p-2 rounded-md">
+          <h3 className="font-semibold text-[1rem]">{direccion.calle}</h3>
+          <p className="font-semibold text-[1rem]">{direccion.numero}</p>
+          <p className="font-semibold text-[1rem]">{direccion.entreCalle1}</p>
+          <p className="font-semibold text-[1rem]">{direccion.entreCalle2}</p>
+        </div>
+      ))}
     </div>
 
     <div className="flex flex-col gap-2 m-2">

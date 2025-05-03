@@ -25,7 +25,9 @@ export default function LoginPage() {
       })
 
       setSuccess(true)
-      navigate('/')
+      setTimeout(() => {
+        navigate('/')
+      }, 2000)
 
     } catch (err) {
       setError("Ocurrió un error durante el inicio de sesión")
@@ -43,6 +45,8 @@ export default function LoginPage() {
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Iniciar sesión</h2>
         </div>
+
+        {error && <p className="text-red-500 mb-4">{error}</p>}
 
         {success ? (
           <div className="rounded-md bg-green-50 p-4">
