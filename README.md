@@ -1,1 +1,1 @@
-App web para automatizar proceso de compras online de comida.
+App web pedido de comida.
