@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeftFromLine, User, ShoppingBag } from 'lucide-react'
 import NavBar from '../components/NavBar'
-import { CartTab } from '../components/CartTab'
 import { ModalPedidos } from '../components/ModalPedidos'
+import { CartTab } from '../components/cartTab'
 import supabase from '../config/supabaseClient'
 
 export default function Products() {
@@ -126,7 +126,7 @@ export default function Products() {
                   
                   <div className="flex justify-center my-4">
                     <img 
-                      src='../../public/hambur.png' 
+                      src={`${product.image}`}
                       alt={product.name} 
                       className="h-[120px] object-contain" 
                     />

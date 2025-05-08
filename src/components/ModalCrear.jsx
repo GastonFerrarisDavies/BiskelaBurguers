@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { CircleX } from "lucide-react"
 import supabase from "../config/supabaseClient"
 import CardHeader from "./CardHeader"
@@ -21,28 +21,49 @@ export function ModalCrear({ isOpen, closeModal }) {
   const [price, setPrice] = useState("")
   const [formError, setFormError] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [image, setImage] = useState(null)
+
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setFormError(null)
 
-    if (!name || !category || !price) {
+    if (!name || !category || !price || !image) {
       setFormError("Todos los campos son obligatorios")
       return
     }
 
     try {
       setIsSubmitting(true)
+      
+      const { errorImg } = await supabase.storage.from('productsimages').upload(`${name}.jpg`, image)
 
-      const { error } = await supabase.from("Producto").insert([{ name, category, price }])
+      if (errorImg) {
+        throw errorImg
+      }
+
+      // Obtener la URL pública de la imagen
+      const { data: { publicUrl } } = supabase.storage
+        .from('productsimages')
+        .getPublicUrl(`${name}.jpg`)
+
+      const { error } = await supabase.from("Producto").insert([{ 
+        name, 
+        category, 
+        price, 
+        image: publicUrl 
+      }])
 
       if (error) {
         throw error
       }
 
+      
+
       setName("")
       setCategory("")
       setPrice("")
+      setImage(null)
       closeModal()
       alert("Producto creado con éxito")
     } catch (error) {
@@ -118,6 +139,16 @@ export function ModalCrear({ isOpen, closeModal }) {
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="Precio del producto"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="image">Imagen</Label>
+              <Input
+                id="image"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImage(e.target.files[0])}
               />
             </div>
 
