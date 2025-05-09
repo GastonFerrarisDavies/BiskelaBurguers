@@ -4,32 +4,49 @@ import { PencilLine, ArrowBigDownDash } from 'lucide-react';
 import { ModalCrear } from '../components/ModalCrear.jsx';
 import ModalEditar from '../components/ModalEditar.jsx';
 import ModalUser from '../components/ModalUser.jsx';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Admin() {
+  const { user, loading } = useAuth();
   const [isOpenCrear, setIsOpenCrear] = useState(false);
   const [isOpenEditar, setIsOpenEditar] = useState(false);
   const [isOpenUser, setIsOpenUser] = useState(false);
   const [data, setData] = useState([]);
   const [pSelected, setPSelected] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(null);
 
   useEffect(() => {
+    if (!user) return;
+    const checkAdmin = async () => {
+      const { data, error } = await supabase
+        .from('Admin')
+        .select('email')
+        .eq('email', user.email)
+        .single();
+      setIsAdmin(!!data && !error);
+    };
+    checkAdmin();
+  }, [user]);
 
+  useEffect(() => {
     const fetchData = async () => {
-
       try {
         const { data, error } = await supabase.from('Producto').select('*')
         if (error) throw error
         setData(data)
-
       } 
       catch (error) {
         console.log(error)
       }
+      finally {
+      }
     }
     fetchData()
-  })
+  }, []);
 
-  
+  if (loading) return <div className="flex justify-center items-center h-screen bg-gray-300 font-bold">Cargando...</div>;
+  if (!isAdmin || !user ) return <div className="flex justify-center items-center h-screen bg-gray-300 font-bold">No tienes acceso a esta página.</div>;
+
   return (
     <>
       <header className="flex w-[100vw] justify-center align-center p-3 bg-gebum-violet">

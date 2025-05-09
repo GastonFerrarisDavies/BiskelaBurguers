@@ -23,26 +23,26 @@ function ModalUser({ isOpen, closeModal }) {
     setSuccess(false);
 
     // Verificar si el email ya existe
-  const { data: existing, error: fetchError } = await supabase
+  const { dataFetch, errorFetch } = await supabase
     .from('Admin')
-    .select('email')
-    .eq('email', userEmail)
+    .select('user_email')
+    .eq('useremail', userEmail)
     .maybeSingle();
 
-  if (existing) {
+  if (dataFetch) {
     setIsSubmitting(false);
     setError('Este email ya fue agregado como administrador.');
     return;
   }
-  if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116: No rows found
+  if (errorFetch && errorFetch.code !== 'PGRST116') { // PGRST116: No rows found
     setIsSubmitting(false);
     setError('Ocurrió un error al verificar el email.');
     return;
   }
 
-    const { data, error: insertError } = await supabase.from('Admin').insert([{ email: userEmail, type: 'admin' }]);
+    const { dataPost, errorPost} = await supabase.from('Admin').insert([{ useremail: userEmail, type: 'admin' }]);
     setIsSubmitting(false);
-    if (insertError) {
+    if (errorPost) {
       setError('Ocurrió un error al añadir el administrador.');
       return;
     }
@@ -73,7 +73,7 @@ function ModalUser({ isOpen, closeModal }) {
                 <Label htmlFor="calle">Mail de administrador</Label>
                 <Input
                 type="text"
-                placeholder="Buscar por email..."
+                placeholder="Escribe el email del nuevo admin..."
                 value={userEmail}
                 onChange={(e) => setUserEmail(e.target.value)}
               />
