@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import Home from './pages/Home';
 import Products from './pages/Products';
@@ -11,10 +10,9 @@ import MiCuenta from './pages/MiCuenta';
 import './App.css'
 
 export function App() {
-
   return (
     <>
-    <Router>
+    <Router basename="/">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
@@ -22,8 +20,8 @@ export function App() {
         <Route path="/finPedido" element={<FinPedido />} />
         <Route path="/inicioSesion" element={<InicioSesion />} />
         <Route path="/registro" element={<Registro />} />
-        <Route path="*" element={<NotFound />} />
         <Route path="/miCuenta" element={<MiCuenta />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
     </>
