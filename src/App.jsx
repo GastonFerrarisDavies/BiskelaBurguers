@@ -7,6 +7,7 @@ import InicioSesion from './pages/InicioSesion';
 import Registro from './pages/Registro';
 import NotFound from './pages/NotFound';
 import MiCuenta from './pages/MiCuenta';
+import ResetPassword from './pages/ResetPassword';
 import './App.css'
 
 export function App() {
@@ -21,6 +22,7 @@ export function App() {
         <Route path="/inicioSesion" element={<InicioSesion />} />
         <Route path="/registro" element={<Registro />} />
         <Route path="/miCuenta" element={<MiCuenta />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

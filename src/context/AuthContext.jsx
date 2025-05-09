@@ -1,6 +1,5 @@
-// src/contexts/AuthContext.jsx
 import { createContext, useState, useEffect } from 'react';
-import supabase from '../config/supabaseClient.js'; // Asegúrate de tener tu instancia de Supabase configurada
+import supabase from '../config/supabaseClient.js'; 
 
 export const AuthContext = createContext(null);
 
@@ -8,6 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -21,6 +21,34 @@ export const AuthProvider = ({ children }) => {
       setUser(session?.user ?? null);
     });
   }, []);
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (user?.email) {
+        try {
+          const { data, error } = await supabase
+            .from('Admin')
+            .select('*')
+            .eq('useremail', user.email)
+            .maybeSingle();
+
+          if (error) {
+            console.error('Error checking admin status:', error);
+            setIsAdmin(false);
+          } else {
+            setIsAdmin(!!data);
+          }
+        } catch (err) {
+          console.error('Error in admin check:', err);
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
 
   const signIn = async (email, password) => {
     setLoading(true);
@@ -43,13 +71,13 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   };
 
-
   const value = {
     session,
     user,
     loading,
     signIn,
     logOut,
+    isAdmin,
   };
 
   return (
