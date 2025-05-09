@@ -4,6 +4,14 @@ import { CartContext } from '../context/CartContext';
 import { AuthContext } from '../context/AuthContext';
 import supabase from '../config/supabaseClient';
 import NavBar from '../components/NavBar';
+import Card from '../components/Card';
+import CardHeader from '../components/CardHeader';
+import CardTitle from '../components/CardTitle';
+import CardContent from '../components/CardContent';
+import CardFooter from '../components/CardFooter';
+import Input from '../components/Input';
+import Label from '../components/Label';
+import Button from '../components/Button';
 
 export default function FinPedido() {
   const navigate = useNavigate();
@@ -13,6 +21,11 @@ export default function FinPedido() {
   const [direcciones, setDirecciones] = useState([]);
   const [direccionSeleccionada, setDireccionSeleccionada] = useState('');
   const [metodoPago, setMetodoPago] = useState('');
+  const [calle, setCalle] = useState("");
+  const [numero, setNumero] = useState("");
+  const [entrecalle1, setEntrecalle1] = useState("");
+  const [entrecalle2, setEntrecalle2] = useState("");
+  const [formError, setFormError] = useState(null);
 
   useEffect(() => {
     if (cart.length === 0) {
@@ -58,20 +71,36 @@ export default function FinPedido() {
   };
 
   const handleConfirmarPedido = () => {
-    if (!direccionSeleccionada) {
-      alert('Por favor, selecciona una dirección de entrega.');
-      return;
+    if (user?.id) {
+      if (!direccionSeleccionada) {
+        alert('Por favor, selecciona una dirección de entrega.');
+        return;
+      }
+      if (!metodoPago) {
+        alert('Por favor, selecciona un método de pago.');
+        return;
+      }
+      const direccionEntrega = direcciones.find(dir => dir.id === direccionSeleccionada);
+      console.log('Pedido a realizar a la dirección:', direccionEntrega);
+      console.log('Método de pago seleccionado:', metodoPago);
+      alert(`Pedido realizado con éxito a la dirección seleccionada mediante ${metodoPago}.`);
+      navigate('/');
+    } else {
+      if (!calle || !numero || !entrecalle1 || !entrecalle2) {
+        setFormError("Todos los campos de dirección son obligatorios");
+        return;
+      }
+      if (!metodoPago) {
+        setFormError("Por favor, selecciona un método de pago.");
+        return;
+      }
+      setFormError(null);
+      const direccionEntrega = { calle, numero, entreCalle1: entrecalle1, entreCalle2: entrecalle2 };
+      console.log('Pedido a realizar a la dirección:', direccionEntrega);
+      console.log('Método de pago seleccionado:', metodoPago);
+      alert(`Pedido realizado con éxito a la dirección indicada mediante ${metodoPago}.`);
+      navigate('/');
     }
-    if (!metodoPago) {
-      alert('Por favor, selecciona un método de pago.');
-      return;
-    }
-
-    const direccionEntrega = direcciones.find(dir => dir.id === direccionSeleccionada);
-    console.log('Pedido a realizar a la dirección:', direccionEntrega);
-    console.log('Método de pago seleccionado:', metodoPago);
-    alert(`Pedido realizado con éxito a la dirección seleccionada mediante ${metodoPago}.`);
-    navigate('/');
   };
 
   if (loading) {
@@ -115,27 +144,55 @@ export default function FinPedido() {
             <div className="space-y-4">
               <div>
                 <p className="text-gray-600">Email</p>
-                <p className="font-medium">{user?.email}</p>
+                <p className="font-medium">{user?.email || 'Invitado'}</p>
               </div>
-              <div>
-                <label htmlFor="direccion" className="block text-gray-700 text-sm font-bold mb-2">
-                  Seleccionar Dirección de Entrega:
-                </label>
-                <select
-                  id="direccion"
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  value={direccionSeleccionada}
-                  onChange={handleDireccionChange}
-                >
-                  <option value="" disabled>Selecciona una dirección</option>
-                  {direcciones.map((direccion) => (
-                    <option key={direccion.id} value={direccion.id}>
-                      {direccion.calle} {direccion.numero}, {direccion.entreCalle1} y {direccion.entreCalle2}
-                    </option>
-                  ))}
-                  {direcciones.length === 0 && <option disabled>No hay direcciones guardadas</option>}
-                </select>
-              </div>
+              {user?.id ? (
+                <div>
+                  <label htmlFor="direccion" className="block text-gray-700 text-sm font-bold mb-2">
+                    Seleccionar Dirección de Entrega:
+                  </label>
+                  <select
+                    id="direccion"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    value={direccionSeleccionada}
+                    onChange={handleDireccionChange}
+                  >
+                    <option value="" disabled>Selecciona una dirección</option>
+                    {direcciones.map((direccion) => (
+                      <option key={direccion.id} value={direccion.id}>
+                        {direccion.calle} {direccion.numero}, {direccion.entreCalle1} y {direccion.entreCalle2}
+                      </option>
+                    ))}
+                    {direcciones.length === 0 && <option disabled>No hay direcciones guardadas</option>}
+                  </select>
+                </div>
+              ) : (
+                <Card className="mb-4">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-bold">Dirección de Entrega</CardTitle>
+                  </CardHeader>
+                  <form onSubmit={e => { e.preventDefault(); handleConfirmarPedido(); }}>
+                    <CardContent className="space-y-4 pt-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="calle">Calle</Label>
+                        <Input id="calle" value={calle} onChange={e => setCalle(e.target.value)} placeholder="Ej: San Martín" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="numero">Número</Label>
+                        <Input id="numero" value={numero} onChange={e => setNumero(e.target.value)} placeholder="Ej: 1400" />
+                      </div>
+                      <div className="space-y-2 flex flex-row gap-2 align-center items-center justify-center">
+                          <Label className="" htmlFor="entrecalle1">Entrecalles</Label>
+                        <div className="flex flex-row gap-2 items-center">
+                          <Input id="entrecalle1" value={entrecalle1} onChange={e => setEntrecalle1(e.target.value)} placeholder="Ej: Belgrano" />
+                          <Input id="entrecalle2" value={entrecalle2} onChange={e => setEntrecalle2(e.target.value)} placeholder="Ej: Rivadavia" />
+                        </div>
+                      </div>
+                      {formError && <p className="text-sm font-medium text-red-500">{formError}</p>}
+                    </CardContent>
+                  </form>
+                </Card>
+              )}
               <div>
                 <label htmlFor="metodoPago" className="block text-gray-700 text-sm font-bold mb-2">
                   Seleccionar Método de Pago:
@@ -155,6 +212,7 @@ export default function FinPedido() {
             <button
               onClick={() => navigate('/MiCuenta')}
               className="mt-6 w-full bg-gebum-violet text-white py-2 rounded-md hover:bg-gebum-violet transition-colors"
+              style={{ display: user?.id ? 'block' : 'none' }}
             >
               Administrar Direcciones
             </button>
@@ -171,7 +229,7 @@ export default function FinPedido() {
           <button
             className="bg-green-700 text-white px-6 py-2 rounded-md hover:bg-gebum-violet transition-colors transition-all duration-300"
             onClick={handleConfirmarPedido}
-            disabled={direcciones.length === 0 || !metodoPago}
+            disabled={user?.id ? (direcciones.length === 0 || !metodoPago) : (!calle || !numero || !entrecalle1 || !entrecalle2 || !metodoPago)}
           >
             Confirmar Pedido
           </button>
