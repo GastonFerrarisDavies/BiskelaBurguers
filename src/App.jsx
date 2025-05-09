@@ -17,13 +17,13 @@ export function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/Products" element={<Products />} />
-        <Route path="/Admin" element={<Admin />} />
-        <Route path="/FinPedido" element={<FinPedido />} />
-        <Route path="/InicioSesion" element={<InicioSesion />} />
-        <Route path="/Registro" element={<Registro />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/finPedido" element={<FinPedido />} />
+        <Route path="/inicioSesion" element={<InicioSesion />} />
+        <Route path="/registro" element={<Registro />} />
         <Route path="*" element={<NotFound />} />
-        <Route path="/MiCuenta" element={<MiCuenta />} />
+        <Route path="/miCuenta" element={<MiCuenta />} />
       </Routes>
     </Router>
     </>
