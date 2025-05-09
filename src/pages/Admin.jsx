@@ -3,11 +3,12 @@ import { useState, useEffect } from 'react'
 import { PencilLine, ArrowBigDownDash } from 'lucide-react';
 import { ModalCrear } from '../components/ModalCrear.jsx';
 import ModalEditar from '../components/ModalEditar.jsx';
-
+import ModalUser from '../components/ModalUser.jsx';
 
 export default function Admin() {
   const [isOpenCrear, setIsOpenCrear] = useState(false);
   const [isOpenEditar, setIsOpenEditar] = useState(false);
+  const [isOpenUser, setIsOpenUser] = useState(false);
   const [data, setData] = useState([]);
   const [pSelected, setPSelected] = useState(null);
 
@@ -39,8 +40,8 @@ export default function Admin() {
         <button onClick={() => {setIsOpenCrear(true)}} className="my-2 w-full bg-gebum-violet text-white py-2 rounded-md hover:bg-gebum-violet transition-colors">
                 Crear
         </button>
-        <button className="my-2 w-full bg-red-400 text-white py-2 rounded-md hover:bg-gebum-violet transition-colors">
-                Eliminar
+        <button onClick={() => { setIsOpenUser(true)}} className="my-2 w-full bg-red-400 text-white py-2 rounded-md hover:bg-gebum-violet transition-colors">
+                Añadir administrador
         </button>
         <div className="flex flex-row items-center justify-center bg-green-500 text-white p-2 text-center rounded-md">
           <p className="mx-2">Seleccione producto a editar </p>
@@ -60,6 +61,7 @@ export default function Admin() {
       </div>
       <ModalCrear isOpen={isOpenCrear} closeModal={ () => setIsOpenCrear(false) } />
       <ModalEditar isOpen={isOpenEditar} pSelected={pSelected} closeModal={ () => setIsOpenEditar(false) } />
+      <ModalUser isOpen={isOpenUser} closeModal={ () => setIsOpenUser(false) } />
     </>
   );
 }

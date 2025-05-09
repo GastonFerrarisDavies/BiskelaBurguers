@@ -11,6 +11,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
+  const [showReset, setShowReset] = useState(false)
+  const [resetEmail, setResetEmail] = useState("")
+  const [resetLoading, setResetLoading] = useState(false)
+  const [resetError, setResetError] = useState(null)
+  const [resetSuccess, setResetSuccess] = useState(false)
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -24,13 +29,18 @@ export default function LoginPage() {
         password,
       })
 
-      setSuccess(true)
-      setTimeout(() => {
-        navigate('/')
-      }, 2000)
-
+      if (error) {
+        setError("Correo o contraseña incorrectos")
+        setSuccess(false)
+      } else {
+        setSuccess(true)
+        setTimeout(() => {
+          navigate('/')
+        }, 2000)
+      }
     } catch (err) {
       setError("Ocurrió un error durante el inicio de sesión")
+      setSuccess(false)
     } finally {
       setLoading(false)
     }
@@ -116,9 +126,57 @@ export default function LoginPage() {
               >
                 No tienes una cuenta? Crea una.
               </button>
+              <button
+                type="button"
+                onClick={() => setShowReset(!showReset)}
+                className="mt-2 text-sm text-gebum-violet hover:underline bg-transparent border-none shadow-none"
+              >
+                ¿Has olvidado tu contraseña?
+              </button>
             </div>
           </form>
         )}
+
+        {/* Recuperación de contraseña */}
+        {showReset && (
+          <div className="mt-4 p-4 border rounded bg-white">
+            <h3 className="text-md font-semibold mb-2">Recuperar contraseña</h3>
+            <input
+              type="email"
+              placeholder="Introduce tu correo electrónico"
+              className="w-full px-3 py-2 border rounded mb-2"
+              value={resetEmail}
+              onChange={e => setResetEmail(e.target.value)}
+              disabled={resetLoading}
+            />
+            <button
+              className="w-full py-2 px-4 bg-gebum-violet text-white rounded disabled:opacity-50"
+              onClick={async () => {
+                setResetLoading(true);
+                setResetError(null);
+                setResetSuccess(false);
+                try {
+                  const { error } = await supabase.auth.resetPasswordForEmail(resetEmail);
+                  if (error) {
+                    setResetError("No se pudo enviar el correo de recuperación. Verifica el correo e inténtalo de nuevo.");
+                  } else {
+                    setResetSuccess(true);
+                  }
+                } catch (err) {
+                  setResetError("Ocurrió un error al intentar recuperar la contraseña.");
+                } finally {
+                  setResetLoading(false);
+                }
+              }}
+              disabled={resetLoading || !resetEmail}
+            >
+              {resetLoading ? "Enviando..." : "Enviar correo de recuperación"}
+            </button>
+            {resetError && <p className="text-red-500 mt-2 text-sm">{resetError}</p>}
+            {resetSuccess && <p className="text-green-600 mt-2 text-sm">Correo de recuperación enviado. Revisa tu bandeja de entrada.</p>}
+          </div>
+        )}
+
       </div>
     </div>
     </div>

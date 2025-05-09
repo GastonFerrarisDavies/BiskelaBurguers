@@ -5,7 +5,8 @@ export const createOrder = ( req, res) => {
         public_key: process.env.MERCADO_PAGO_PUBLIC_KEY
     })
 
-    mercadopago.preferences.create({
+    const result = async () => { 
+        await mercadopago.preferences.create({
         items: [
             {
                 title: "Producto",
@@ -24,5 +25,5 @@ export const createOrder = ( req, res) => {
     const { session } = req.context
     const { user } = session
     const { cart } = req.body
-    
+}  
 }

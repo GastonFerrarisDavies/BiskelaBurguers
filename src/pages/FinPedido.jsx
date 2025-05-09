@@ -93,7 +93,7 @@ export default function FinPedido() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Información del Carrito */}
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-md p-6 max-h-[500px] overflow-y-auto">
             <h2 className="text-xl font-semibold mb-4">Tu Pedido</h2>
             {cart.map((item) => (
               <div key={item.id} className="flex justify-between items-center mb-4 pb-4 border-b">
@@ -169,7 +169,7 @@ export default function FinPedido() {
             Volver
           </button>
           <button
-            className="bg-green-700 text-white px-6 py-2 rounded-md hover:bg-gebum-violet transition-colors"
+            className="bg-green-700 text-white px-6 py-2 rounded-md hover:bg-gebum-violet transition-colors transition-all duration-300"
             onClick={handleConfirmarPedido}
             disabled={direcciones.length === 0 || !metodoPago}
           >

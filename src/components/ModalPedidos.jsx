@@ -84,7 +84,7 @@ export function ModalPedidos({ isOpen, closeModal, pSelected }) {
 
             <button
               onClick={incrementQuantity}
-              className="flex items-center justify-center w-10 h-10 bg-gebum-violet text-white rounded-md hover:bg-violet-700 transition-colors"
+              className="flex items-center justify-center w-10 h-10 bg-gebum-violet text-white rounded-md"
               aria-label="Increase quantity"
             >
               <Plus size={20} />
@@ -94,7 +94,7 @@ export function ModalPedidos({ isOpen, closeModal, pSelected }) {
           {/* Add to Cart Button */}
           <button
             onClick={handleAddToCart}
-            className="w-full py-3 bg-gebum-violet text-white text-lg font-medium rounded-md hover:bg-violet-700 transition-colors"
+            className="w-full py-3 bg-gebum-violet text-white text-lg font-medium rounded-md"
           >
             Agregar ${calculateTotal().toFixed(2)}
           </button>
