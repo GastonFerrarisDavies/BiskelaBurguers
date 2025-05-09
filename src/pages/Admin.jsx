@@ -4,29 +4,16 @@ import { PencilLine, ArrowBigDownDash } from 'lucide-react';
 import { ModalCrear } from '../components/ModalCrear.jsx';
 import ModalEditar from '../components/ModalEditar.jsx';
 import ModalUser from '../components/ModalUser.jsx';
-import { useAuth } from '../hooks/useAuth';
+import { AuthContext } from '../context/AuthContext';
+import { useContext } from 'react';
 
 export default function Admin() {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useContext(AuthContext);
   const [isOpenCrear, setIsOpenCrear] = useState(false);
   const [isOpenEditar, setIsOpenEditar] = useState(false);
   const [isOpenUser, setIsOpenUser] = useState(false);
   const [data, setData] = useState([]);
   const [pSelected, setPSelected] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(null);
-
-  useEffect(() => {
-    if (!user) return;
-    const checkAdmin = async () => {
-      const { data, error } = await supabase
-        .from('Admin')
-        .select('email')
-        .eq('email', user.email)
-        .single();
-      setIsAdmin(!!data && !error);
-    };
-    checkAdmin();
-  }, [user]);
 
   useEffect(() => {
     const fetchData = async () => {
