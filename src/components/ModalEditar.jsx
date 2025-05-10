@@ -19,7 +19,19 @@ export default function ModalEditar ({ pSelected, isOpen, closeModal }) {
     name: pSelected?.name,
     category: pSelected?.category,
     price: pSelected?.price,
+    image: pSelected?.image
   });
+
+  useEffect(() => {
+    setEditedProduct({
+      id: pSelected?.id,
+      name: pSelected?.name,
+      category: pSelected?.category,
+      price: pSelected?.price,
+      image: pSelected?.image
+    });
+  }, [pSelected]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -29,13 +41,13 @@ export default function ModalEditar ({ pSelected, isOpen, closeModal }) {
     setError(null);
 
     try {
-        console.log("el producto es: ", editedProduct)
       const { data, error } = await supabase
         .from('Producto')
         .update({
           name: editedProduct.name,
           category: editedProduct.category,
-          price: editedProduct.price
+          price: editedProduct.price,
+          image: editedProduct.image
         })
         .eq('id', editedProduct.id)
         .select();
@@ -43,6 +55,7 @@ export default function ModalEditar ({ pSelected, isOpen, closeModal }) {
       if (error) {
         throw error;
       }
+      
 
       setEditedProduct({ id: null, name: '', category: '', price: '' });
       if (closeModal) {
@@ -90,7 +103,6 @@ export default function ModalEditar ({ pSelected, isOpen, closeModal }) {
               <RadioGroup 
                 value={editedProduct.category} 
                 onValueChange={(value) => {
-                  console.log("Valor seleccionado:", value);
                   setEditedProduct(prev => ({
                     ...prev,
                     category: value
