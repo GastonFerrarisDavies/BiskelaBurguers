@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import supabase from '../config/supabaseClient';
-import { Trash2 } from 'lucide-react';
 import { CircleX } from 'lucide-react';
 import Card from './Card';
 import CardHeader from './CardHeader';
@@ -43,15 +42,17 @@ export default function ModalEliminar({ isOpen, closeModal, pSelected }) {
               </CardHeader>
               <CardContent>
 
-              <div className="flex flex-col">
-                <h1>¿Estás seguro de querer eliminar ?</h1>
-                <button onClick={closeModal}>Cancelar</button>
-                <button onClick={() => {
-                    closeModal();
-                    deleteProduct(pSelected.id);
-                }}>{isLoading ? 'Eliminando...' : 'Eliminar'}</button>
-                {error && <p className="text-red-500">{error.message}</p>}
-                {success && <p className="text-green-500">{success}</p>}
+              <div className="flex flex-col gap-2 justify-center items-center">
+                <h1>¿Estás seguro de querer eliminar {pSelected.name}?</h1>
+                <div className="flex gap-2 flex-row">
+                  <Button onClick={closeModal}>Cancelar</Button>
+                  <Button className="bg-red-500" onClick={() => {
+                      closeModal();
+                      deleteProduct(pSelected.id);
+                  }}>{isLoading ? 'Eliminando...' : 'Eliminar'}</Button>
+                  {error && <p className="text-red-500">{error.message}</p>}
+                  {success && <p className="text-green-500">{success}</p>}
+                </div>
             </div>
               </CardContent>
             </Card>

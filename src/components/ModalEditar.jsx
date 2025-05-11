@@ -31,7 +31,6 @@ export default function ModalEditar ({ pSelected, isOpen, closeModal }) {
       image: pSelected?.image
     });
   }, [pSelected]);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -40,13 +39,19 @@ export default function ModalEditar ({ pSelected, isOpen, closeModal }) {
     setLoading(true);
     setError(null);
 
+    if (!editedProduct.name || !editedProduct.category || !editedProduct.price) {
+      setError("Todos los campos son obligatorios.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('Producto')
         .update({
           name: editedProduct.name,
           category: editedProduct.category,
-          price: editedProduct.price,
+          price: Number(editedProduct.price),
           image: editedProduct.image
         })
         .eq('id', editedProduct.id)
@@ -55,7 +60,6 @@ export default function ModalEditar ({ pSelected, isOpen, closeModal }) {
       if (error) {
         throw error;
       }
-      
 
       setEditedProduct({ id: null, name: '', category: '', price: '' });
       if (closeModal) {
@@ -94,7 +98,7 @@ export default function ModalEditar ({ pSelected, isOpen, closeModal }) {
                 id="name"
                 value={editedProduct.name}
                 onChange={(e) => setEditedProduct({ ...editedProduct, name: e.target.value })}
-                placeholder={pSelected.name}
+                placeholder={pSelected?.name || ""}
               />
             </div>
 
@@ -138,7 +142,7 @@ export default function ModalEditar ({ pSelected, isOpen, closeModal }) {
                 type="number"
                 value={editedProduct.price}
                 onChange={(e) => setEditedProduct({ ...editedProduct, price: e.target.value })}
-                placeholder={pSelected.price}
+                placeholder={pSelected?.price || ""}
               />
             </div>
 

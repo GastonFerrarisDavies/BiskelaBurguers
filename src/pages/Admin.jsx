@@ -67,6 +67,7 @@ export default function Admin() {
                   size={25} 
                   onClick={(e) => {
                     e.stopPropagation();
+                    setPSelected(product);
                     setIsOpenEditar(true)}}/>
                 <Trash2
                   className="hover:text-red-400"
@@ -74,6 +75,7 @@ export default function Admin() {
                   size={25}
                   onClick={e => {
                     e.stopPropagation();
+                    setPSelected(product);
                     setIsOpenEliminar(true);
                   }}
                 />
