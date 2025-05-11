@@ -21,6 +21,10 @@ export default function ModalEditar ({ pSelected, isOpen, closeModal }) {
     price: pSelected?.price,
     image: pSelected?.image
   });
+  const [newImage, setNewImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   useEffect(() => {
     setEditedProduct({
@@ -30,14 +34,14 @@ export default function ModalEditar ({ pSelected, isOpen, closeModal }) {
       price: pSelected?.price,
       image: pSelected?.image
     });
+    setNewImage(null);
   }, [pSelected]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(null);
 
     if (!editedProduct.name || !editedProduct.category || !editedProduct.price) {
       setError("Todos los campos son obligatorios.");
@@ -46,25 +50,44 @@ export default function ModalEditar ({ pSelected, isOpen, closeModal }) {
     }
 
     try {
+      let imageUrl = editedProduct.image;
+
+      if (newImage) {
+        if (editedProduct.image) {
+          const oldImageName = editedProduct.image.split('/').pop();
+          await supabase.storage.from('productsimages').remove([oldImageName]);
+        }
+
+        const { error: uploadError } = await supabase.storage
+          .from('productsimages')
+          .upload(`${editedProduct.name}.jpg`, newImage);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('productsimages')
+          .getPublicUrl(`${editedProduct.name}.jpg`);
+
+        imageUrl = publicUrl;
+      }
+
       const { data, error } = await supabase
         .from('Producto')
         .update({
           name: editedProduct.name,
           category: editedProduct.category,
           price: Number(editedProduct.price),
-          image: editedProduct.image
+          image: imageUrl
         })
         .eq('id', editedProduct.id)
         .select();
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      setEditedProduct({ id: null, name: '', category: '', price: '' });
-      if (closeModal) {
+      setSuccess('Producto actualizado correctamente');
+      setTimeout(() => {
         closeModal(data[0]);
-      }
+      }, 2000);
     } catch (error) {
       console.error('Error al actualizar el producto:', error);
       setError('Hubo un error al intentar actualizar el producto.');
@@ -146,7 +169,30 @@ export default function ModalEditar ({ pSelected, isOpen, closeModal }) {
               />
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="image">Imagen</Label>
+              {editedProduct.image && !newImage && (
+                <div className="mb-2">
+                  <img 
+                    src={editedProduct.image} 
+                    alt={editedProduct.name} 
+                    className="w-32 h-32 object-cover rounded-md"
+                  />
+                </div>
+              )}
+              <Input
+                id="image"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setNewImage(e.target.files[0])}
+              />
+              {newImage && (
+                <p className="text-sm text-gray-500">Nueva imagen seleccionada</p>
+              )}
+            </div>
+
             {error && <p className="text-sm font-medium text-red-500">{error}</p>}
+            {success && <p className="text-sm font-medium text-green-500">{success}</p>}
           </CardContent>
 
           <CardFooter>

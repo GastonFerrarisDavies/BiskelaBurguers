@@ -22,6 +22,7 @@ export function ModalCrear({ isOpen, closeModal }) {
   const [formError, setFormError] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [image, setImage] = useState(null)
+  const [ succes, setSucces] = useState(null)
 
 
   const handleSubmit = async (e) => {
@@ -42,7 +43,6 @@ export function ModalCrear({ isOpen, closeModal }) {
         throw errorImg
       }
 
-      // Obtener la URL pública de la imagen
       const { data: { publicUrl } } = supabase.storage
         .from('productsimages')
         .getPublicUrl(`${name}.jpg`)
@@ -64,8 +64,8 @@ export function ModalCrear({ isOpen, closeModal }) {
       setCategory("")
       setPrice("")
       setImage(null)
-      closeModal()
-      alert("Producto creado con éxito")
+      setSucces("Producto creado con éxito")
+      setTimeout(closeModal, 2000)
     } catch (error) {
       setFormError("Error al crear el producto")
       console.error(error)
@@ -153,6 +153,7 @@ export function ModalCrear({ isOpen, closeModal }) {
             </div>
 
             {formError && <p className="text-sm font-medium text-red-500">{formError}</p>}
+            {succes && <p className="text-sm font-medium text-green-500">{succes}</p>}
           </CardContent>
 
           <CardFooter>
@@ -161,6 +162,7 @@ export function ModalCrear({ isOpen, closeModal }) {
             </Button>
           </CardFooter>
         </form>
+ 
       </Card>
     </div>
   )

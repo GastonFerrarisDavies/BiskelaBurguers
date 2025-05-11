@@ -7,6 +7,8 @@ import ModalUser from '../components/ModalUser.jsx';
 import ModalEliminar from '../components/ModalEliminar.jsx';
 import { AuthContext } from '../context/AuthContext';
 import { useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeftFromLine } from 'lucide-react';
 
 export default function Admin() {
   const { user, loading, isAdmin } = useContext(AuthContext);
@@ -16,6 +18,7 @@ export default function Admin() {
   const [isOpenUser, setIsOpenUser] = useState(false);
   const [data, setData] = useState([]);
   const [pSelected, setPSelected] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,9 +40,14 @@ export default function Admin() {
   if (!isAdmin || !user ) return <div className="flex justify-center items-center h-screen bg-gray-300 font-bold">No tienes acceso a esta página.</div>;
 
   return (
-    <>
-      <header className="flex w-[100vw] justify-center align-center p-3 bg-gebum-violet">
-        <p1 className="bg-gebum-violet text-white p-2"> Bienvenido al panel de administración.</p1>
+    <div className="flex flex-col h-screen">
+      <header>
+        <div className="flex flex-row justify-between align-center w-screen p-5 bg-gebum-violet">
+            <span className="text-white font-extrabold text-[1.3rem] cursor-pointer" onClick={() => navigate('/')} >Panel de administración</span>
+            <div className="flex flex-row gap-2">
+              <ArrowLeftFromLine className="cursor-pointer" onClick={() => navigate('/')} color="white" size={30} />
+            </div>
+          </div>
       </header>
       <div className="flex flex-col w-screen gap-2 p-2 h-[100vh] bg-gradient-to-b from-gebum-white to-gebum-gray">
 
@@ -52,7 +60,7 @@ export default function Admin() {
         <div className="flex flex-row items-center justify-center bg-green-500 text-white p-2 text-center rounded-md">
           <p className="mx-2">Seleccione producto a editar </p>
           <ArrowBigDownDash color="#ffffff" size={25}/></div>
-        <div className="flex flex-col mx-2 max-h-[200px] overflow-auto">
+        <div className="flex flex-col mx-2 max-h-[500px] overflow-auto">
           {data.map(product => (
             <div onClick={ () => {setPSelected(product)}} key={product.id} className="flex py-1 px-3 mx-2 my-1 flex-row justify-between items-center bg-[#e6e6e6] hover:bg-purple-400 rounded-lg shadow-md transition-[.5s] cursor-pointer">
               <div className="flex flex-col">
@@ -88,6 +96,6 @@ export default function Admin() {
       <ModalEditar isOpen={isOpenEditar} pSelected={pSelected} closeModal={ () => setIsOpenEditar(false) } />
       <ModalUser isOpen={isOpenUser} closeModal={ () => {setIsOpenUser(false)} } />
       <ModalEliminar isOpen={isOpenEliminar} pSelected={pSelected} closeModal={ () => {setIsOpenEliminar(false)} } />
-    </>
+    </div>
   );
 }

@@ -11,14 +11,15 @@ export default function ModalEliminar({ isOpen, closeModal, pSelected }) {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
+
     const deleteProduct = async () => {
         setIsLoading(true);
         setError(null);
 
         try {
-            await supabase.from('products').delete().eq('id', pSelected.id);
+            await supabase.from('Producto').delete().eq('id', pSelected.id);
             setSuccess('Producto eliminado correctamente');
-            setTimeout(closeModal(),2000);
+            setTimeout(closeModal, 2000);
         } catch (error) {
             setError(error);
         }
@@ -47,12 +48,11 @@ export default function ModalEliminar({ isOpen, closeModal, pSelected }) {
                 <div className="flex gap-2 flex-row">
                   <Button onClick={closeModal}>Cancelar</Button>
                   <Button className="bg-red-500" onClick={() => {
-                      closeModal();
                       deleteProduct(pSelected.id);
                   }}>{isLoading ? 'Eliminando...' : 'Eliminar'}</Button>
+                </div>
                   {error && <p className="text-red-500">{error.message}</p>}
                   {success && <p className="text-green-500">{success}</p>}
-                </div>
             </div>
               </CardContent>
             </Card>
